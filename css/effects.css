@@ -1,0 +1,73 @@
+/* effects.css — fireflies layer, mist, the opening cover, entrance fades, keyframes.
+   Everything here is decorative: reduced motion or the Animations switch turns it into plain fades or nothing. */
+
+/* ---------- mist: one soft layer drifting slowly (transform only, so it stays cheap) ---------- */
+.mist {
+  position: absolute; inset: -15% -20%; opacity: 0.7; will-change: transform;
+  background:
+    radial-gradient(ellipse 38% 14% at 62% 82%, rgba(206, 232, 218, 0.07), transparent 70%),
+    radial-gradient(ellipse 30% 12% at 82% 92%, rgba(206, 232, 218, 0.06), transparent 70%);
+  animation: drift 90s ease-in-out infinite alternate;
+}
+#fireflies { position: absolute; inset: 0; }
+
+/* ---------- opening cover: a glass diary closed over the blurred forest ---------- */
+.cover {
+  position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; perspective: 1700px;
+  background: rgba(3, 10, 7, 0.55); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  animation: fade-in 500ms var(--ease-soft) both;
+}
+.cover.is-leaving { opacity: 0; pointer-events: none; transition: opacity 900ms var(--ease-soft); }
+.cover__book { position: relative; width: min(74vw, 21rem); aspect-ratio: 3 / 4; transform-style: preserve-3d; filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.55)); }
+.cover__page {
+  position: absolute; inset: 0; display: grid; place-content: center; gap: 0.4rem; text-align: center; padding: 1.5rem; border-radius: 6px var(--r-xl) var(--r-xl) 6px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.08)), rgba(10, 26, 19, 0.7);
+  border: 1px solid var(--edge-strong); box-shadow: inset 0 1px 0 rgba(255, 228, 180, 0.5);
+}
+.cover__page-kicker { font-size: 0.72rem; font-weight: 750; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mint); }
+.cover__page-date { font-family: var(--font-title); font-size: 2.2rem; font-weight: 400; line-height: 1; }
+.cover__front {
+  position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 0.6rem; text-align: center;
+  border-radius: 6px var(--r-xl) var(--r-xl) 6px; color: var(--leaf);
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.06) 45%, rgba(255, 255, 255, 0.16)),
+    rgba(12, 32, 23, 0.82);
+  border: 1px solid var(--edge-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 50px rgba(143, 232, 180, 0.12), 0 0 40px rgba(143, 232, 180, 0.1);
+  transform-origin: left center; backface-visibility: hidden; transition: transform 1500ms var(--ease);
+}
+.cover__front::before {   /* the spiral binding along the cover's edge */
+  content: ''; position: absolute; left: 0.5rem; top: 1.2rem; bottom: 1.2rem; width: 1.9rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='36'%3E%3Cdefs%3E%3ClinearGradient id='m' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.45' stop-color='%23a9bcb0'/%3E%3Cstop offset='1' stop-color='%23eaf3ed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='21' cy='18' r='4.2' fill='%23020806' fill-opacity='.55'/%3E%3Crect x='1.6' y='14.4' width='22' height='7.2' rx='3.6' fill='none' stroke='url(%23m)' stroke-width='2.6'/%3E%3C/svg%3E") repeat-y center top / 1.9rem auto;
+}
+.cover.is-opening .cover__front { transform: rotateY(-164deg); }
+.cover__mark { width: 3.2rem; height: 3.2rem; filter: drop-shadow(0 0 14px rgba(143, 232, 180, 0.8)); }
+.cover__title { font-family: var(--font-title); font-size: 3.6rem; font-weight: 400; letter-spacing: 0; line-height: 0.9; color: #fff; text-shadow: 0 0 28px rgba(143, 232, 180, 0.6); }
+.cover__sub { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink-soft); }
+.cover__skip {
+  position: absolute; bottom: max(1.5rem, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+  padding: 0.6rem 1.5rem; border-radius: 999px; border: 1px solid var(--edge-strong); background: rgba(255, 255, 255, 0.1);
+  color: #fff; font-weight: 650; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); transition: all var(--t-fast) var(--ease);
+}
+.cover__skip:hover { border-color: var(--gold-edge-bright); background: rgba(143, 232, 180, 0.2); }
+.cover.is-reduced .cover__page { display: none; }
+.cover.is-reduced .cover__front { transition: none; }
+
+/* the diary and HUD fade up behind the cover, the dragon's HUD a beat later */
+.app--entering .diary, .app--entering .rail { animation: fade-in 800ms var(--ease-soft) both; }
+.app--entering ~ .hud, .hud.is-entering { animation: hud-in 1200ms 400ms var(--ease) both; }
+
+/* ---------- Animations switched off ---------- */
+body.no-anim *, body.no-anim *::before, body.no-anim *::after { animation: none !important; }
+body.no-anim .mist { opacity: 0.4; }
+
+@keyframes drift { from { transform: translate3d(-4%, 0, 0); } to { transform: translate3d(5%, -2%, 0); } }
+@keyframes page-in { from { opacity: 0; transform: translateY(10px); } }
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes hud-in { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes bloom { 0% { opacity: 0; } 28% { opacity: 1; filter: brightness(1.4); } 100% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mist { animation: none; }
+  .cover.is-opening .cover__front { transform: none; }
+}
